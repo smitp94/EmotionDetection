@@ -25,7 +25,7 @@ with tf.Session() as session:
         print(session.run(state))
 
 """
-
+"""
 print("Rohan")
 
 
@@ -36,3 +36,5 @@ b = a * 2
 with tf.Session() as session:
     result = session.run(b, feed_dict=dictionary)
     print(result)
+"""
+
