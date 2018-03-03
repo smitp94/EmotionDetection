@@ -38,3 +38,24 @@ with tf.Session() as session:
     print(result)
 """
 
+
+list = [[2,1,2,1],[2,None,2,None],[None,1,None,1],[None,4,None,4]]
+for y in range(0,4):
+    for x in range(0,4):
+        print(list[y][x]," ",end="")
+    print("")
+for y in range(0,3):
+    for x in range(0,3):
+        if list[x+1][y] != None:
+            if list[x+1][y] == list[x][y]:
+                list[x][y] *= 2
+                list[x + 1][y] = None
+            if list[x][y] == None:
+                list[x][y] = list[x+1][y]
+            list[x + 1][y] = None
+print("----------------")
+for y in range(0,4):
+    for x in range(0,4):
+        print(list[y][x]," ",end="")
+    print("")
+
