@@ -1,8 +1,6 @@
 import csv
 from nltk import TweetTokenizer
 
-
-
 def pre_process():
     data = []
     emotions = []
