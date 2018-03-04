@@ -1,11 +1,6 @@
 import tensorflow as tf
 import numpy as np
-
-def preprocess():
-    dict_words = {"i":2,"am":1,"rohan":4}
-    input = [["i","am"],["am","i"],["rohan","i"]]
-    label = ["anger","happy","anger"]
-    return (dict_words,input,label)
+from EmotionDetection.Emotion.Preprocessor import pre_process
 
 def getUniqueWords(dict_words,threshold):
     list_words = {}
@@ -14,16 +9,24 @@ def getUniqueWords(dict_words,threshold):
             list_words[word] = len(list_words)
     return list_words
 
-def createOneHotInputVector(input, words_index):
+def createOneHotInputVector(input, words_index,num_sent):
     data = []
+    #count = 10
     for sent in input:
-        oneHot = np.zeros((len(sent),len(words_index)+1))
-        for index in range(0,len(sent)):
-            dimension = len(words_index)
-            if (sent[index] in words_index):
-                dimension = words_index[sent[index]]
+        #print(len(sent),len(words_index))
+        #oneHot = np.zeros((len(sent),len(words_index)+1))
+        oneHot =[[0 for index in range(0,len(words_index)+1)]for j in range(0,num_sent)]
+        for index in range(0,min(num_sent,len(sent))):
+            #dimension = len(words_index)
+            dimension = 0
+            if (sent[index] in words_index) and (words_index[sent[index]] + 1< num_sent):
+                dimension = words_index[sent[index]] + 1
             oneHot[index][dimension] = 1
         data.append(oneHot)
+        #if count >=0:
+        #    count -= 1
+            #print(sent)
+            #print(np.array(data).shape)
     return data
 
 def createOneHotLabelVector(label):
@@ -35,7 +38,8 @@ def createOneHotLabelVector(label):
 
     train_label = []
     for val in label:
-        oneHot = np.zeros(len(dict_labels))
+        #oneHot = np.zeros(len(dict_labels))
+        oneHot = [0 for i in range(0,len(dict_labels))]
         oneHot[dict_labels[val]] = 1
         train_label.append(oneHot)
 
@@ -43,12 +47,15 @@ def createOneHotLabelVector(label):
 
 def main():
     session = tf.Session()
-    dict_words,input,label = preprocess()
-    threshold = 1
+    dict_words,input,label = pre_process()
+    input = input[:10000]
+    #print("input:",np.array(input).shape)
+    threshold = 50
+    numSent = 20
     words_index = getUniqueWords(dict_words,threshold)
-    train_data = createOneHotInputVector(input,words_index)
+    train_data = createOneHotInputVector(input,words_index,numSent)
+    #print("input2:", np.array(train_data).shape)
     train_label,hidden_size = createOneHotLabelVector(label)
-    numSent = 100
     numWords = len(words_index)+1
 
     """
@@ -62,12 +69,13 @@ def main():
     """
 
     Xtrain = tf.placeholder(tf.float32, [None, numSent, numWords])
-    Ytrain = tf.placeholder(tf.float32, [None])
+    Ytrain = tf.placeholder(tf.float32, [None,hidden_size])
 
     lstm_cell_1 = tf.contrib.rnn.LSTMCell(hidden_size)
     lstm_cell_2 = tf.contrib.rnn.LSTMCell(hidden_size)
-    multi_lstm_cells = tf.contrib.rnn.MultiRNNCell(cells=[lstm_cell_1, lstm_cell_2], state_is_tuple=True)
-    _, final_state = tf.nn.dynamic_rnn(multi_lstm_cells,numSent,dtype=tf.float32)
+    lstm_cell_3 = tf.contrib.rnn.LSTMCell(hidden_size)
+    multi_lstm_cells = tf.contrib.rnn.MultiRNNCell(cells=[lstm_cell_1, lstm_cell_2, lstm_cell_3], state_is_tuple=True)
+    _, final_state = tf.nn.dynamic_rnn(multi_lstm_cells,Xtrain,dtype=tf.float32)
 
 
     prediction = tf.nn.softmax(final_state[-1][-1],1)
@@ -84,7 +92,7 @@ def main():
     tf.global_variables_initializer().run(session=session)
 
 
-    num_steps = 10
+    num_steps = 5000
     batch_size = 64
 
     for step in range(num_steps):
@@ -93,6 +101,11 @@ def main():
         batch_train = train_data[offset: (offset + batch_size)]
         batch_labels = train_label[offset: (offset + batch_size)]
 
+        # print("train")
+        # print(np.array(train_data).shape)
+        # print(np.array(batch_train).shape)
+        # print("label")
+        # print(np.array(batch_labels).shape)
         # put this data into a dictionary that we feed in when we run
         # the graph.  this data fills in the placeholders we made in the graph.
         data = {Xtrain: batch_train, Ytrain: batch_labels}
