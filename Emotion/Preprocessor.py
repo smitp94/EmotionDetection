@@ -1,5 +1,6 @@
 import csv
 from nltk import TweetTokenizer
+import random
 
 def pre_process():
     data = []
@@ -12,6 +13,10 @@ def pre_process():
         for row in csv_reader:
             emotions.append(row[1])
             data.append(row[3])
+        zipped = list(zip(data[:10], emotions[:10]))
+        print(list(zipped))
+        zipped = random.shuffle(zipped)
+        print(list(zipped))
 
 
     tknzr = TweetTokenizer()
