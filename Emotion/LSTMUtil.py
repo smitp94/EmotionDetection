@@ -86,9 +86,6 @@ test_tweets = np.array([t[0] for t in test_data])
 one_hot_test_tweets = utils.one_hot(test_tweets, vocab_size)
 test_labels = np.array([int(t[1]) for t in test_data])
 
-# we'll train with batches of size 128.  This means that we run
-# our model on 128 examples and then do gradient descent based on the loss
-# over those 128 examples.
 num_steps = 1
 
 for step in range(num_steps):
