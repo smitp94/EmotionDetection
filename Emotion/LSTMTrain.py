@@ -55,16 +55,6 @@ def main():
     #train_label = createOneHotLabelVector(label_index,label)
     numWords = len(words_index)+1
 
-    """
-    print(dict_words,input,label)
-    print(words_index)
-    for ele in train_data:
-        print(ele)
-    print("----------------")
-    for ele in train_label:
-        print(ele) 
-    """
-
     Xtrain = tf.placeholder(tf.float32, [None,numSent, numWords])
     Ytrain = tf.placeholder(tf.float32, [None,hidden_size])
 
@@ -104,13 +94,6 @@ def main():
         #batch_labels = train_label[offset: (offset + batch_size)]
         batch_labels = createOneHotLabelVector(label_index, label, offset, batch_size)
 
-        # print("train")
-        # print(np.array(train_data).shape)
-        # print(np.array(batch_train).shape)
-        # print("label")
-        # print(np.array(batch_labels).shape)
-        # put this data into a dictionary that we feed in when we run
-        # the graph.  this data fills in the placeholders we made in the graph.
         data = {Xtrain: batch_train, Ytrain: batch_labels}
 
         _, loss_value_train, error_value_train = session.run(
